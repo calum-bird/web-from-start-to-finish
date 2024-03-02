@@ -78,7 +78,7 @@ function App() {
                   connectNulls: true,
                   dataKey: "feeling",
                   valueFormatter: (value) =>
-                    `${
+                    `${value}/10: ${
                       entries.find((entry) => entry.feeling === value)?.notes ||
                       "No notes for this entry"
                     }`,

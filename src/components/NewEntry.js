@@ -1,24 +1,28 @@
-import * as React from "react";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import Slider from "@mui/material/Slider";
-import TextField from "@mui/material/TextField";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
+import { forwardRef, useState } from "react";
+import {
+  Box,
+  Button,
+  Dialog,
+  FormGroup,
+  Slider,
+  TextField,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
+  Slide,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 
-const Transition = React.forwardRef(function Transition(props, ref) {
+const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 export default function NewEntry(props) {
-  const { cancel, handleSave, open } = props;
-  const [feelingNotes, setFeelingNotes] = React.useState("");
-  const [feelingRating, setFeelingRating] = React.useState(5);
+  const { open, cancel, addEntryAndClose } = props;
+  const [feelingScaleValue, setFeelingScaleValue] = useState(5);
+  const [notes, setNotes] = useState("");
 
   return (
     <Dialog
@@ -29,42 +33,65 @@ export default function NewEntry(props) {
     >
       <AppBar sx={{ position: "relative" }}>
         <Toolbar>
-          <Typography variant="h3">New Entry</Typography>
+          <Typography variant="h6" sx={{ flex: 1 }}>
+            New Entry
+          </Typography>
           <IconButton
             edge="start"
             color="inherit"
             onClick={cancel}
-            aria-label="close"
+            aria-label="Cancel"
           >
             <CloseIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Toolbar />
-      <TextField
-        label="How are you feeling today?"
-        variant="outlined"
-        value={feelingNotes}
-        onChange={(e, text) => setFeelingNotes(text)}
-      />
-      <Slider
-        defaultValue={feelingRating}
-        aria-label="Default"
-        valueLabelDisplay="auto"
-        onChange={(e) => setFeelingRating(e.target.value)}
-      />
-      <Button
-        variant="contained"
-        onClick={() => {
-          handleSave({
-            createdAt: new Date(),
-            notes: feelingNotes,
-            rating: feelingRating,
-          });
-        }}
-      >
-        Save
-      </Button>
+      <Box sx={{ p: 3 }}>
+        <FormGroup>
+          <TextField
+            label="How are you feeling today?"
+            variant="outlined"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+          <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
+            Today I am feeling like a {feelingScaleValue} out of 10
+          </Typography>
+          <Slider
+            aria-label="Feeling on a scale of 1 to 10"
+            defaultValue={5}
+            value={feelingScaleValue}
+            onChange={(_, value) => setFeelingScaleValue(value)}
+            getAriaValueText={() =>
+              "Today I am feeling like a " + feelingScaleValue + " out of 10"
+            }
+            valueLabelDisplay="auto"
+            size="medium"
+            shiftStep={1}
+            valueLabelFormat={(value) => value + "/10"}
+            step={1}
+            marks
+            min={1}
+            max={10}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            size="medium"
+            sx={{ maxWidth: 200, mt: 3 }}
+            onClick={() => {
+              const today = new Date();
+              addEntryAndClose({
+                createdAt: today.toISOString(),
+                feeling: feelingScaleValue,
+                notes,
+              });
+            }}
+          >
+            Save Entry
+          </Button>
+        </FormGroup>
+      </Box>
     </Dialog>
   );
 }
